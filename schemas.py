@@ -1,35 +1,37 @@
+from datetime import date
+
 from pydantic import BaseModel
 
 
-class ItemBase(BaseModel):
-    title: str
-    description: str | None = None
+class AuthorBase(BaseModel):
+    name: str
+    bio: str | None = None
 
 
-class ItemCreate(ItemBase):
+class AuthorCreate(AuthorBase):
     pass
 
 
-class Item(ItemBase):
+class Author(AuthorBase):
     id: int
-    owner_id: int
 
     class Config:
         orm_mode = True
 
 
-class UserBase(BaseModel):
-    email: str
+class BookBase(BaseModel):
+    title: str
+    summary: str | None = None
+    publication_date: date
 
 
-class UserCreate(UserBase):
-    password: str
+class BookCreate(BookBase):
+    author_id: int
 
 
-class User(UserBase):
+class Book(BookBase):
     id: int
-    is_active: bool
-    items: list[Item] = []
+    author_id: int
 
     class Config:
         orm_mode = True

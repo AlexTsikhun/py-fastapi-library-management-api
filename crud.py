@@ -1,36 +1,60 @@
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+import models
+import schemas
+from pagination import paginate
 
 
-def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+def get_all_authors(db: Session):  # add pagi
+    return db.query(models.DBAuthor).all()
 
 
-def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
+def get_author_by_name(db: Session, name: str):
+    return db.query(models.DBAuthor).filter(models.DBAuthor.name == name).first()
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).offset(skip).limit(limit).all()
+def get_author_by_id(db: Session, author_id: int):
+    return db.query(models.DBAuthor).filter(models.DBAuthor.id == author_id).first()
 
 
-def create_user(db: Session, user: schemas.UserCreate):
-    fake_hashed_password = user.password + "notreallyhashed"
-    db_user = models.User(email=user.email, hashed_password=fake_hashed_password)
-    db.add(db_user)
+def create_author(db: Session, author: schemas.AuthorCreate):
+    db_author = models.DBAuthor(
+        name=author.name,
+        bio=author.bio,
+    )
+    db.add(db_author)
     db.commit()
-    db.refresh(db_user)
-    return db_user
+    db.refresh(db_author)
+
+    return db_author
 
 
-def get_items(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Item).offset(skip).limit(limit).all()
+def get_books_list(
+    skip: int,
+    limit: int,
+    db: Session,
+    author_id: int | None = None,
+):
+    queryset = db.query(models.DBBook)
+
+    if author_id is not None:
+        queryset = queryset.filter(models.DBBook.author_id == author_id)
+
+    return paginate(queryset, skip=skip, limit=limit)
 
 
-def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
-    db_item = models.Item(**item.dict(), owner_id=user_id)
-    db.add(db_item)
+def get_book(db: Session, book_id: int):
+    return db.query(models.DBBook).filter(models.DBBook.id == book_id).first()
+
+
+def create_book(db: Session, book: schemas.BookCreate):
+    db_cheese = models.DBBook(
+        title=book.title,
+        summary=book.summary,
+        publication_date=book.publication_date,
+        author_id=book.author_id,
+    )
+    db.add(db_cheese)
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    db.refresh(db_cheese)
+    return db_cheese
