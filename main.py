@@ -72,6 +72,10 @@ def read_book(book_id: int, db: Session = Depends(get_db)):
 
 @app.post("/books/", response_model=schemas.Book)
 def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
+    if crud.validate_author_id(db, book.author_id):
+        raise HTTPException(
+            status_code=404, detail=f"Author with id {book.author_id} not found"
+        )
     return crud.create_book(db=db, book=book)
 
 
