@@ -5,8 +5,9 @@ import schemas
 from pagination import paginate
 
 
-def get_all_authors(db: Session):  # add pagi
-    return db.query(models.DBAuthor).all()
+def get_authors_list(skip: int, limit: int, db: Session):
+    author_queryset = db.query(models.DBAuthor)
+    return paginate(author_queryset, skip=skip, limit=limit)
 
 
 def get_author_by_name(db: Session, name: str):
@@ -35,12 +36,12 @@ def get_books_list(
     db: Session,
     author_id: int | None = None,
 ):
-    queryset = db.query(models.DBBook)
+    book_queryset = db.query(models.DBBook)
 
     if author_id is not None:
-        queryset = queryset.filter(models.DBBook.author_id == author_id)
+        book_queryset = book_queryset.filter(models.DBBook.author_id == author_id)
 
-    return paginate(queryset, skip=skip, limit=limit)
+    return paginate(book_queryset, skip=skip, limit=limit)
 
 
 def get_book(db: Session, book_id: int):

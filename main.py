@@ -19,9 +19,9 @@ def get_db() -> Session:
 
 
 @app.get("/authors/", response_model=list[schemas.Author])
-def read_authors(db: Session = Depends(get_db)):
+def read_authors(skip: int = 0, limit: int = 2, db: Session = Depends(get_db)):
     """response_model showing in docs like expected type, also validates input"""
-    return crud.get_all_authors(db=db)
+    return crud.get_authors_list(db=db, skip=skip, limit=limit)
 
 
 @app.get("/authors/{author_id}/", response_model=schemas.Author)
