@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing_extensions import Annotated
 
 import crud
 import schemas
@@ -18,10 +19,21 @@ def get_db() -> Session:
         db.close()
 
 
+def get_skip_limit(skip: int = 0, limit: int = 2):
+    return skip, limit
+
+
+PaginationParameters = Annotated[dict, Depends(get_skip_limit)]
+
+
 @app.get("/authors/", response_model=list[schemas.Author])
-def read_authors(skip: int = 0, limit: int = 2, db: Session = Depends(get_db)):
+def read_authors(
+    pagination_parameters: PaginationParameters, db: Session = Depends(get_db)
+):
     """response_model showing in docs like expected type, also validates input"""
-    return crud.get_authors_list(db=db, skip=skip, limit=limit)
+    return crud.get_authors_list(
+        db=db, skip=pagination_parameters[0], limit=pagination_parameters[1]
+    )
 
 
 @app.get("/authors/{author_id}/", response_model=schemas.Author)
@@ -52,12 +64,16 @@ def create_author(
 
 @app.get("/books/", response_model=list[schemas.Book])
 def read_books(
-    skip: int = 0,
-    limit: int = 2,
+    pagination_parameters: PaginationParameters,
     db: Session = Depends(get_db),
     author_id: int | None = None,
 ):
-    return crud.get_books_list(db=db, author_id=author_id, skip=skip, limit=limit)
+    return crud.get_books_list(
+        db=db,
+        author_id=author_id,
+        skip=pagination_parameters[0],
+        limit=pagination_parameters[1],
+    )
 
 
 @app.get("/books/{book_id}/", response_model=schemas.Book)
