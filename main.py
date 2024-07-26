@@ -77,11 +77,3 @@ def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
             status_code=404, detail=f"Author with id {book.author_id} not found"
         )
     return crud.create_book(db=db, book=book)
-
-
-# Create a new author.+
-# Retrieve a list of authors with pagination (skip, limit).+-
-# Retrieve a single author by ID.+
-# Create a new book for a specific author.+
-# Retrieve a list of books with pagination (skip, limit).+
-# Filter books by author ID.+
